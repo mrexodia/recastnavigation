@@ -1262,7 +1262,10 @@ void dtCrowd::update(const float dt, dtCrowdAgentDebugInfo* debug)
 		if (ag->state != DT_CROWDAGENT_STATE_WALKING)
 			continue;
 		
-		if (ag->params.updateFlags & DT_CROWD_OBSTACLE_AVOIDANCE)
+		// A stationary agent's desired velocity is already the only valid result.
+		// Sampling adaptive avoidance for every idle crowd member is quadratic in
+		// nearby agents and can starve the world loop without changing that result.
+		if ((ag->params.updateFlags & DT_CROWD_OBSTACLE_AVOIDANCE) && ag->desiredSpeed > 0.0001f)
 		{
 			m_obstacleQuery->reset();
 			
